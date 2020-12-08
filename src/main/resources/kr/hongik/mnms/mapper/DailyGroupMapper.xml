@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.hongik.mnms.mapper.DailyGroupMapper">
+
+	<select id="dutch" parameterType="String"
+		resultType="kr.hongik.mnms.DailyGroup">
+		SELECT * FROM `DAILYGROUP` WHERE DID = #{DID}
+	</select>
+
+	<select id="info" parameterType="String"
+		resultType="kr.hongik.mnms.DailyGroup">
+		SELECT DID FROM `DAILYGROUP` WHERE GID = #{GID}
+	</select>
+	<select id="infoG" parameterType="String"
+		resultType="kr.hongik.mnms.Group">
+		SELECT * FROM `GROUP` WHERE GID = #{GID}
+	</select>
+
+	<select id="memList" parameterType="String"
+		resultType="kr.hongik.mnms.Member">
+		SELECT `MEMBER`.memID,`MEMBER`.memName FROM `PARTICIPATE`,
+		`MEMBER`
+		WHERE `PARTICIPATE`.GID= #{GID} AND `PARTICIPATE`.memID =
+		`MEMBER`.memID
+	</select>
+	<delete id="deleteParticipate"
+		parameterType="kr.hongik.mnms.Participate">
+		DELETE FROM PARTICIPATE WHERE memID=#{memID} AND
+		GID=#{GID}
+	</delete>
+	
+	<insert id="newgroup" parameterType="String">
+		INSERT INTO
+		`GROUP`(groupName) VALUES (#{dailyName})
+	</insert>
+	<insert id="newdgroup" parameterType="String">
+		INSERT INTO
+		`DAILYGROUP`(GID) SELECT GID FROM `GROUP` WHERE groupName=#{dailyName}
+	</insert>
+
+	<select id="add" parameterType="kr.hongik.mnms.Participate">
+		INSERT INTO `PARTICIPATE`(memID,
+		GID) VALUES(#{memID}, #{GID})
+	</select>
+
+	<select id="getgid" parameterType="String" resultType="Integer">
+		SELECT
+		`GID` FROM `GROUP` WHERE groupName=#{dailyName}
+	</select>
+	<update id="updateAccount" parameterType="hashmap">
+		update 	`ACCOUNT` set accountBalance=accountBalance-CONVERT(#{money}, UNSIGNED) WHERE accountNum=#{accountNum}
+	</update>
+	<insert id="updateSend" parameterType="kr.hongik.mnms.Transaction">
+		INSERT INTO `TRANSACTION`(`transactHistory`,`transactMoney`,`since`,`accountNum`,`DID`) 
+		VALUES(#{transactHistory},#{transactMoney},#{since},#{accountNum},#{DID})
+	</insert>
+<select id="dutchpay" parameterType="String" resultType="HashMap">
+		SELECT SUM(transactMoney) AS money,`TRANSACTION`.accountNum,memID from `TRANSACTION`
+ 			INNER JOIN `MEMBER` ON `MEMBER`.accountNum=`TRANSACTION`.accountNum
+ 			where DID=#{DID}
+ 			group by `TRANSACTION`.accountNum
+	</select> 
+	<select id="checkPW" parameterType="String" resultType="kr.hongik.mnms.Account">
+		SELECT * FROM `ACCOUNT` WHERE accountNum=#{accountNum}
+	</select>
+	
+	<update id="updatefriendAccount" parameterType="hashmap">
+		update 	`ACCOUNT` set accountBalance=accountBalance+CONVERT(#{money}, UNSIGNED) WHERE accountNum=#{accountNum}
+	</update>
+	<insert id="updateSend2" parameterType="kr.hongik.mnms.Transaction">
+		INSERT INTO `TRANSACTION`(`transactHistory`,`transactMoney`,`since`,`accountNum`) 
+		VALUES(#{transactHistory},#{transactMoney},#{since},#{accountNum})
+	</insert>
+	<select id="iscalculated" parameterType="Integer" resultType="boolean">
+		SELECT EXISTS(select * from CALCULATE WHERE DID=#{dID}) exist
+	</select>
+	<insert id="calculate" parameterType="kr.hongik.mnms.CALCULATE">
+		INSERT INTO `CALCULATE`(`DID`,`memID`,`count`) 
+		VALUES(#{DID},#{memID},#{count})
+	</insert>
+	<update id="updateCalculate" parameterType="kr.hongik.mnms.CALCULATE">
+		update 	`CALCULATE` set count=count-1 WHERE DID=#{DID} AND memID=#{memID}
+	</update>
+	<select id="istransacted" parameterType="kr.hongik.mnms.CALCULATE" resultType="boolean">
+		SELECT EXISTS(select * from CALCULATE WHERE DID=#{DID} AND memID=#{memID} AND count=0) exist
+	</select>
+	<select id="checkdelete" parameterType="Integer" resultType="boolean">
+		SELECT EXISTS(select * from CALCULATE WHERE DID=#{DID} AND count!=0) exist
+	</select>
+	<delete id="deleteDaily" parameterType="Integer">
+		DELETE FROM
+		DAILYGROUP WHERE GID=#{gID}
+	</delete>
+	<delete id="deleteGroup" parameterType="Integer">
+		DELETE FROM
+		`GROUP` WHERE GID=#{gID}
+	</delete>
+	<delete id="deleteDailygroup" parameterType="Integer">
+		DELETE FROM
+		PARTICIPATE WHERE GID=#{gID}
+	</delete>
+	<select id="getDID" parameterType="String" resultType="Integer">
+		SELECT DID FROM `DAILYGROUP` WHERE GID=#{gID}
+	</select>
+	<select id="checkfriend" parameterType="hashmap" resultType="boolean">
+		SELECT EXISTS(select * from FRIEND WHERE memID=#{memID} AND friendID=#{friendID} AND state='friend') exist
+	</select>
+	<select id="isvalidName" parameterType="String" resultType="boolean">
+		SELECT EXISTS(select * from `GROUP` WHERE groupName=#{dailyName}) exist
+	</select>
+</mapper>

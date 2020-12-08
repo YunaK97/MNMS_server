@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.hongik.mnms.mapper.TransactionMapper">
+
+	<select id="dailyTransact" parameterType="String" resultType="kr.hongik.mnms.Transaction">
+		SELECT TRANSACTION.* FROM `TRANSACTION`, `DAILYGROUP` WHERE DAILYGROUP.GID = #{GID} AND DAILYGROUP.DID = TRANSACTION.DID ORDER BY since DESC
+	</select>
+
+	<select id="membershipTransact" parameterType="String" resultType="kr.hongik.mnms.Transaction">
+		SELECT TRANSACTION.* FROM `TRANSACTION`, `MEMBERSHIPGROUP` WHERE MEMBERSHIPGROUP.GID = #{GID} AND MEMBERSHIPGROUP.MID = TRANSACTION.MID ORDER BY since DESC
+	</select>
+
+	<select id="listTransaction" parameterType="String" resultType="kr.hongik.mnms.Transaction">
+		SELECT * FROM `TRANSACTION` WHERE accountNum = #{accountNum} ORDER BY since DESC
+	</select>
+	<select id="accountBalance" parameterType="String" resultType="Integer">
+		SELECT accountBalance FROM `ACCOUNT` WHERE `ACCOUNT`.accountNum = #{accountNum}
+	</select>
+</mapper>

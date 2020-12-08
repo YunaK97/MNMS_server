@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.hongik.mnms.mapper.MembershipGroupMapper">
+
+	<select id="info" parameterType="String"
+		resultType="kr.hongik.mnms.MembershipGroup">
+		SELECT * FROM `MEMBERSHIPGROUP` WHERE GID = #{GID}
+	</select>
+		<select id="infoG" parameterType="String"
+		resultType="kr.hongik.mnms.Group">
+		SELECT groupName FROM `GROUP` WHERE GID = #{GID}
+	</select>
+
+	<select id="memList" parameterType="String"
+		resultType="kr.hongik.mnms.Member">
+		SELECT `MEMBER`.memID,`MEMBER`.memName FROM `PARTICIPATE`,
+		`MEMBER`
+		WHERE `PARTICIPATE`.GID = #{GID} AND `PARTICIPATE`.memID =`MEMBER`.memID
+	</select>
+
+	<delete id="deleteParticipate"
+		parameterType="kr.hongik.mnms.Participate">
+		DELETE FROM PARTICIPATE WHERE memID=#{memID} AND
+		GID=#{GID}
+	</delete>
+	<delete id="deleteGroup" parameterType="String">
+		DELETE FROM `GROUP` WHERE
+		GID=#{GID}
+	</delete>
+	<delete id="deleteMembershipgroup" parameterType="String">
+		DELETE FROM
+		MEMBERSHIPGROUP WHERE GID=#{GID}
+	</delete>
+	<insert id="newgroup" parameterType="String">
+		INSERT INTO
+		`GROUP`(`groupName`) VALUES(#{name})
+	</insert>
+	<insert id="newmgroup"
+		parameterType="kr.hongik.mnms.MembershipGroup">
+		INSERT INTO
+		`MEMBERSHIPGROUP`(`president`,`fee`,`notSubmit`,`GID`,`payDay`,`payDuration`,`accountNum`)
+		VALUES(#{president},#{fee},#{notSubmit},#{GID},#{payDay},#{payDuration},#{accountNum})
+	</insert>
+	<select id="getgid" parameterType="String" resultType="Integer">
+		SELECT GID
+		FROM `GROUP` WHERE groupName=#{name}
+	</select>
+	<insert id="add" parameterType="kr.hongik.mnms.Participate">
+		INSERT INTO
+		`PARTICIPATE`(`memID`,`GID`) VALUES(#{memID},#{GID})
+	</insert>
+	<insert id="newAccount" parameterType="kr.hongik.mnms.Account">
+		INSERT INTO
+		`ACCOUNT`(`accountNum`,`accountBank`,`accountBalance`,`accountPassword`) VALUES(#{accountNum},#{accountBank},#{accountBalance},#{accountPassword})
+	</insert>
+	<select id="getmid" parameterType="String" resultType="Integer">
+		SELECT MID FROM `MEMBERSHIPGROUP` WHERE `MEMBERSHIPGROUP`.GID =#{GID}
+	</select>
+	<insert id="addfee" parameterType="kr.hongik.mnms.MemberFee">
+		INSERT INTO `MEMBERFEE` VALUES(#{memID},#{MID},0,false);
+	</insert>
+	<select id="getMembership" parameterType="String" resultType="Integer">
+		SELECT MID FROM `MEMBERSHIPGROUP` WHERE GID=#{GID}
+	</select>
+	<select id="checkPresident" parameterType="kr.hongik.mnms.MembershipGroup" resultType="Integer">
+		SELECT COUNT(*) FROM `MEMBERSHIPGROUP` WHERE president=#{president} AND GID=#{GID}
+	</select>
+	<select id="getMemberfee" parameterType="kr.hongik.mnms.MemberFee" resultType="kr.hongik.mnms.MemberFee">
+		SELECT * FROM `MEMBERFEE` WHERE memID=#{memID} AND MID=#{MID}
+	</select>
+	
+	<select id="getTotal" parameterType="String" resultType="Integer">
+		SELECT accountBalance FROM `ACCOUNT` WHERE accountNum=#{accountNum}
+	</select>
+	<update id="updateAccount" parameterType="kr.hongik.mnms.Account">
+		UPDATE ACCOUNT SET accountBalance=#{accountBalance} WHERE ACCOUNT.accountNum=#{accountNum}
+	</update>
+	<insert id="updateTrans1" parameterType="kr.hongik.mnms.Transaction">
+		INSERT INTO `TRANSACTION`(`transactHistory`,`transactMoney`,`since`,`accountNum`) 
+		VALUES(#{transactHistory},#{transactMoney},#{since},#{accountNum})
+	</insert>
+	<insert id="updateTrans2" parameterType="kr.hongik.mnms.Transaction">
+		INSERT INTO `TRANSACTION`(`transactHistory`,`transactMoney`,`since`,`accountNum`,`MID`) 
+		VALUES(#{transactHistory},#{transactMoney},#{since},#{accountNum},#{MID})
+	</insert>
+	<select id="getmTotal" parameterType="Integer" resultType="kr.hongik.mnms.Account">
+		SELECT * FROM `MEMBERSHIPGROUP`,`ACCOUNT` WHERE `MEMBERSHIPGROUP`.MID=#{mID} AND `MEMBERSHIPGROUP`.accountNum=`ACCOUNT`.accountNum
+	</select>
+	<update id="updateMembership" parameterType="kr.hongik.mnms.Account">
+		UPDATE ACCOUNT SET accountBalance=#{accountBalance} WHERE ACCOUNT.accountNum=#{accountNum}
+	</update>
+	<update id="updateMemberfee" parameterType="kr.hongik.mnms.MemberFee">
+		UPDATE MEMBERFEE SET MEMBERFEE.check=1 WHERE MEMBERFEE.memID=#{memID} AND MEMBERFEE.MID=#{MID}
+	</update>
+	<select id="checkPW" parameterType="String" resultType="kr.hongik.mnms.Account">
+		SELECT * FROM `ACCOUNT` WHERE accountNum=#{accountNum}
+	</select>
+	<delete id="deleteMember" parameterType="kr.hongik.mnms.Participate">
+		DELETE FROM `PARTICIPATE` WHERE memID=#{memID} AND GID=#{GID}
+	</delete>
+	
+	<select id="getParticipate" parameterType="String"
+		resultType="kr.hongik.mnms.Participate">
+		SELECT GID FROM `PARTICIPATE`
+		WHERE memID = #{memID}
+	</select>
+	<select id="getMname" parameterType="Integer" resultType="String">
+		SELECT groupName FROM `GROUP` WHERE GID=#{GID}
+	</select>
+	<select id="getPayday" parameterType="Integer" resultType="kr.hongik.mnms.MembershipGroup">
+		SELECT * FROM MEMBERSHIPGROUP WHERE MID=#{MID}
+	</select>
+	<update id="checkUnpay" parameterType="String">
+		UPDATE MEMBERFEE SET MEMBERFEE.count = CASE WHEN MEMBERFEE.check=0 
+		THEN MEMBERFEE.count+1 ELSE MEMBERFEE.count END,
+		MEMBERFEE.check= CASE WHEN MEMBERFEE.check=1 THEN 0 ELSE 0 END
+ 		WHERE MID=#{mID}
+	 </update>
+	 <delete id="getOut" parameterType="hashmap">
+	   DELETE u,r
+	   FROM `MEMBERFEE` AS u
+	   JOIN `PARTICIPATE` r ON r.memID=u.memID
+	   WHERE u.MID=#{a} AND u.count>=#{b} AND GID=#{c}
+	 </delete>
+	 <select id="notSubmit" parameterType="hashmap" resultType="Integer">
+	  SELECT `MEMBERFEE`.count FROM `MEMBERFEE` where memID=#{memID} AND MID=#{MID}
+	 </select>
+
+	 <select id="notSubmitP" parameterType="String" resultType="kr.hongik.mnms.MemberFee">
+	  SELECT * FROM MEMBERFEE where MID=#{MID}
+	 </select>
+	 <update id="setdate" parameterType="kr.hongik.mnms.MembershipGroup">
+	 	UPDATE MEMBERSHIPGROUP SET payDay=#{payDay},payDuration=#{payDuration} WHERE MID=#{MID} 
+	 </update>
+	 <update id="updatedate" parameterType="hashmap">
+	 	UPDATE MEMBERSHIPGROUP SET payDay = CASE WHEN payDuration='month' 
+		THEN DATE_ADD(payDay,INTERVAL 1 MONTH) 
+        WHEN payDuration='day'
+        THEN DATE_ADD(payDay,INTERVAL 1 DAY) 
+        WHEN payDuration='year'
+        THEN DATE_ADD(payDay,INTERVAL 1 YEAR) 
+        END
+ 		WHERE MID=#{MID}
+	 </update>
+	 <update id="updatepay" parameterType="kr.hongik.mnms.MembershipGroup">
+	 	UPDATE MEMBERSHIPGROUP SET fee=#{fee} WHERE MID=#{MID}
+	 </update>
+	 <update id="updatename" parameterType="kr.hongik.mnms.Group">
+	 	UPDATE `GROUP` SET groupName=#{groupName} WHERE GID=#{GID}
+	 </update>
+	 <update id="updateNS" parameterType="kr.hongik.mnms.MembershipGroup">
+	 	UPDATE MEMBERSHIPGROUP SET notSubmit=#{notSubmit} WHERE MID=#{MID}
+	 </update>
+	 <select id="isvalidName" parameterType="String" resultType="boolean">
+		SELECT EXISTS(select * from `GROUP` WHERE groupName=#{name}) exist
+	</select>
+	<select id="isValidGID" parameterType="String" resultType="boolean">
+		SELECT EXISTS(select * from `GROUP` WHERE GID=#{gID}) exist
+	</select>
+	<select id="getAccount" parameterType="String" resultType="String">
+		SELECT accountNum FROM `MEMBER` WHERE memID=#{memID}
+	</select>
+	<select id="getMemName" parameterType="String" resultType="String">
+		SELECT memName FROM `MEMBER` WHERE memID=#{memID}
+	</select>
+		<select id="isMembership" parameterType="String" resultType="boolean">
+		SELECT EXISTS(select * from `MEMBERSHIPGROUP` WHERE GID=#{GID}) exist
+	</select>
+</mapper>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.hongik.mnms.mapper.MemberMapper">
+
+	<insert id="memberJoin" parameterType="kr.hongik.mnms.Member">
+		INSERT INTO `MEMBER`
+		(memID, memPW, memName, memEmail, memSsn, accountNum,phoneNumber)
+		VALUES (#{memID},
+		#{memPW}, #{memName}, #{memEmail}, #{memSsn},
+		#{accountNum},#{phoneNumber})
+	</insert>
+
+	<insert id="memberJoinA" parameterType="kr.hongik.mnms.Account">
+		INSERT INTO `ACCOUNT`
+		(accountNum, accountBank, accountBalance, accountPassword)
+		VALUES
+		(#{accountNum}, #{accountBank}, #{accountBalance},
+		#{accountPassword})
+	</insert>
+
+	<select id="memberLogin" parameterType="kr.hongik.mnms.Member"
+		resultType="kr.hongik.mnms.Member">
+		SELECT * FROM `MEMBER` WHERE memID=#{memID} AND
+		memPW=#{memPW}
+	</select>
+	<select id="checkPW" parameterType="kr.hongik.mnms.Member"
+		resultType="String">
+		SELECT memPW FROM `MEMBER` WHERE memPW=#{memPW} AND memID=#{memID}
+	</select>
+
+	<update id="changePW" parameterType="kr.hongik.mnms.Member">
+		UPDATE `MEMBER` SET
+		memPW=#{memPW} WHERE memID=#{memID}
+	</update>
+	<select id="checkID" parameterType="String"
+		resultType="kr.hongik.mnms.Member">
+		SELECT memID FROM `MEMBER` WHERE memID=#{memID}
+	</select>
+
+	<select id="checkEmail" parameterType="String"
+		resultType="kr.hongik.mnms.Member">
+		SELECT memEmail FROM `MEMBER` WHERE memEmail=#{memEmail}
+	</select>
+
+	<select id="dailyGroupList" parameterType="String"
+		resultType="kr.hongik.mnms.Group">
+		SELECT `GROUP`.* FROM `PARTICIPATE`,
+		`GROUP`,`DAILYGROUP`
+		WHERE PARTICIPATE.memID= #{memID} AND PARTICIPATE.GID =
+		GROUP.GID AND
+		`DAILYGROUP`.GID=`GROUP`.GID
+	</select>
+
+	<select id="membershipGroupList" parameterType="String"
+		resultType="kr.hongik.mnms.Group">
+		SELECT `GROUP`.* FROM `PARTICIPATE`,
+		`GROUP`,`MEMBERSHIPGROUP`
+		WHERE PARTICIPATE.memID= #{memID} AND
+		PARTICIPATE.GID =
+		GROUP.GID AND `MEMBERSHIPGROUP`.GID=`GROUP`.GID
+	</select>
+
+	<select id="requestedFriend" parameterType="String"
+		resultType="kr.hongik.mnms.Member">
+		SELECT MEMBER.memID, MEMBER.memName FROM `MEMBER`,`FRIEND`
+		WHERE MEMBER.memID=FRIEND.memID AND FRIEND.friendID=#{memID} AND
+		FRIEND.state='request'
+	</select>
+	<update id="updatefriend" parameterType="kr.hongik.mnms.Friend">
+		UPDATE FRIEND SET state='friend' WHERE FRIEND.state='request' AND FRIEND.memID=#{memID} AND FRIEND.friendID=#{friendID}
+	</update>
+	
+	<insert id="insertfriend" parameterType="kr.hongik.mnms.Friend">
+		INSERT INTO FRIEND VALUES (#{friendID},#{memID},'friend')
+	</insert>
+	<delete id="resultreject" parameterType="kr.hongik.mnms.Friend">
+		DELETE FROM FRIEND WHERE memID=#{memID} AND friendID=#{friendID}
+	</delete>
+	<select id="showFriend" parameterType="String"
+		resultType="kr.hongik.mnms.Member">
+		SELECT `MEMBER`.memID, `MEMBER`.memName FROM
+		`MEMBER`,`FRIEND`
+		WHERE MEMBER.memID=FRIEND.friendID AND
+		FRIEND.memID=#{memID} AND
+		FRIEND.state='friend'
+	</select>
+	<select id="newFriend" parameterType="String"
+		resultType="String">
+		SELECT memName FROM MEMBER WHERE memID=#{memID}
+	</select>
+	<select id="friendcheck" parameterType="kr.hongik.mnms.Friend"
+		resultType="kr.hongik.mnms.Friend">
+		SELECT friendID FROM FRIEND WHERE friendID=#{friendID} AND
+		memID=#{memID} AND state='friend'
+	</select>
+	<insert id="friendAdd" parameterType="kr.hongik.mnms.Friend">
+		INSERT INTO FRIEND
+		VALUES(#{memID},#{friendID},'request')
+	</insert>
+	<!-- <select id="friendResult" parameterType="String" resultType="kr.hongik.mnms.Member"> 
+		UP </select> -->
+	<delete id="deleteFriend" parameterType="kr.hongik.mnms.Friend">
+		DELETE FROM `FRIEND`
+		WHERE memID=#{memID} AND FriendID=#{friendID}
+	</delete>
+	<select id="showTransact" parameterType="String" resultType="kr.hongik.mnms.Transaction">
+		SELECT TRANSACTION.* FROM `TRANSACTION` WHERE TRANSACTION.accountNum=#{accountNum}
+	</select>
+	<update id="updateAccount" parameterType="hashmap">
+		update 	`ACCOUNT` set accountBalance=accountBalance+CONVERT(#{money},SIGNED) WHERE accountNum=#{accountNum}
+	</update>
+	<insert id="updateSend" parameterType="kr.hongik.mnms.Transaction">
+		INSERT INTO `TRANSACTION`(`transactHistory`,`transactMoney`,`since`,`accountNum`) 
+		VALUES(#{transactHistory},#{transactMoney},#{since},#{accountNum})
+	</insert>
+</mapper> 
